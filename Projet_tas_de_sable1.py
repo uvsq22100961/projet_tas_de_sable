@@ -12,5 +12,9 @@ import tkinter as tk
 
 racine = tk.Tk()
 canvas = tk.Canvas(racine, height=HEIGHT, width=WIDTH)
-canvas.grid()
+Bouton1 = tk.Button(racine, text="créer la configuration aléatoire")
+
+
+canvas.grid(row=0, culumn=1)
+Bouton1.grid(row=0, column=0)
 canvas.mainloop()
