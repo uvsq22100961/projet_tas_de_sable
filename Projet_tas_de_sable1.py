@@ -38,6 +38,12 @@ fin_creation_config = True
 a = 0
 #témoin d'utilisation ou non de additionner_configs
 b = 0
+#text lors de l'addition de configurations
+Text2 = 0
+#témoin d'utilisation ou non de soustraire_configs
+c = 0
+#text lors de la soustraction d'une configuration à une autre
+Text3 = 0
 
 
 #fenêtre 
@@ -72,7 +78,7 @@ def couleurs():
                 canvas.create_rectangle((5*element, 5*ligne),(5*(element + 1),5*(ligne + 1)), fill="grey70")
             elif L[ligne][element] == 2:
                 canvas.create_rectangle((5*element, 5*ligne),(5*(element + 1),5*(ligne + 1)), fill="yellow")
-            elif L[ligne][element] == 3:
+            elif L[ligne][element] >= 3:
                 canvas.create_rectangle((5*element, 5*ligne),(5*(element + 1),5*(ligne + 1)), fill="orange")
 
 def config_aleatoire():
@@ -208,31 +214,38 @@ def liste_configs_fin(liste):
     global bouton_Identity
     global a
     L = liste
+    #On supprime les boutons :
     bouton_Random.destroy()
     bouton_Pile.destroy()
     bouton_Max_stable.destroy()
     bouton_Identity.destroy()
+    #On réinitialise le témoin
     a = 0
     #On appelle la fonction "couleurs" pour afficher les changements dans le canevas.
     couleurs()
 
 def additionner_configs():
     """Permet d'additionner la configuration courante avec une configuration choisie dans la liste des configuration"""
+    global bouton_Random
+    global bouton_Pile
+    global bouton_Max_stable
+    global bouton_Identity
     global b
+    global Text2
     b = 1
     #On créee les boutons (on verra plus tard pour la sauvegarde)
     bouton_Random = tk.Button(racine, text="config Random", command=config_Random)
     bouton_Pile = tk.Button(racine, text="config Pile", command=config_Pile)
     bouton_Max_stable = tk.Button(racine, text="config Max stable", command=config_Max_stable)
-    bouton_identity = tk.Button(racine, text="config Identity", command=config_Identity)
+    bouton_Identity = tk.Button(racine, text="config Identity", command=config_Identity)
     #On les positionne
     bouton_Random.grid(row=0, column=3)
     bouton_Pile.grid(row=1, column=3)
     bouton_Max_stable.grid(row=2, column=3)
-    bouton_identity.grid(row=3, column=3)
+    bouton_Identity.grid(row=3, column=3)
     #text d'explication:
     Text2 = tk.Label(racine, text="Cliquez sur la configuration avec laquelle vous voulez additionner la configuration courante")
-    Text2.grid(row=4, column=1)
+    Text2.grid(row=5, column=1)
 
 def additionner_configs_fin(liste):
     global L
@@ -240,15 +253,81 @@ def additionner_configs_fin(liste):
     global bouton_Pile
     global bouton_Max_stable
     global bouton_Identity
+    global Text2
     global b
     bouton_Random.destroy()
     bouton_Pile.destroy()
     bouton_Max_stable.destroy()
     bouton_Identity.destroy()
+    Text2.destroy()
     b = 0
+    #On vérifie ensuite s'il y a des rectangles pour les supprimer et éviter les bugs.
+    #On parcours tous le canevas avec les deux "for":
+    for ligne in range(len(L)):
+        for colonne in range(len(L[ligne])):
+            #S'il y a au moins un grain de sable dans la case...
+            if L[ligne][colonne] != 0:
+                objet = canvas.find_closest(1 + 5*colonne, 1 + 5*ligne)
+                #...on supprime le rectangle de la case...
+                if len(objet) != 0:
+                    canvas.delete(objet[0])
     for ligne in range(len(L)):
         for element in range(len(L[ligne])):
             L[ligne][element] = L[ligne][element] + liste[ligne][element]
+    #On appelle la fonction "couleurs" pour afficher les changements dans le canevas.
+    couleurs()
+
+def soustraire_configs():
+    """Permet de soustraire une configuration choisie dans la liste des configuration à la configuration courante """
+    global bouton_Random
+    global bouton_Pile
+    global bouton_Max_stable
+    global bouton_Identity
+    global c
+    global Text3
+    c = 1
+    #On créee les boutons (on verra plus tard pour la sauvegarde)
+    bouton_Random = tk.Button(racine, text="config Random", command=config_Random)
+    bouton_Pile = tk.Button(racine, text="config Pile", command=config_Pile)
+    bouton_Max_stable = tk.Button(racine, text="config Max stable", command=config_Max_stable)
+    bouton_Identity = tk.Button(racine, text="config Identity", command=config_Identity)
+    #On les positionne
+    bouton_Random.grid(row=0, column=3)
+    bouton_Pile.grid(row=1, column=3)
+    bouton_Max_stable.grid(row=2, column=3)
+    bouton_Identity.grid(row=3, column=3)
+    #text d'explication:
+    Text3 = tk.Label(racine, text="Cliquez sur la configuration qui soustraira la configuration courante")
+    Text3.grid(row=5, column=1)
+
+def soustraire_configs_fin(liste):
+    global L
+    global bouton_Random
+    global bouton_Pile
+    global bouton_Max_stable
+    global bouton_Identity
+    global Text3
+    global c
+    bouton_Random.destroy()
+    bouton_Pile.destroy()
+    bouton_Max_stable.destroy()
+    bouton_Identity.destroy()
+    c = 0
+    #On vérifie ensuite s'il y a des rectangles pour les supprimer et éviter les bugs.
+    #On parcours tous le canevas avec les deux "for":
+    for ligne in range(len(L)):
+        for colonne in range(len(L[ligne])):
+            #S'il y a au moins un grain de sable dans la case...
+            if L[ligne][colonne] != 0:
+                objet = canvas.find_closest(1 + 5*colonne, 1 + 5*ligne)
+                #...on supprime le rectangle de la case...
+                if len(objet) != 0:
+                    canvas.delete(objet[0])
+    for ligne in range(len(L)):
+        for element in range(len(L[ligne])):
+            if liste[ligne][element] <= L[ligne][element]:
+                L[ligne][element] = L[ligne][element] - liste[ligne][element]
+            else: L[ligne][element] = 0
     #On appelle la fonction "couleurs" pour afficher les changements dans le canevas.
     couleurs()
 
@@ -257,6 +336,8 @@ def additionner_configs_fin(liste):
 def config_Random():
     global lconfig_Random
     global a
+    global b
+    global c
     for ligne in range(len(lconfig_Random)):
         for element in range(len(lconfig_Random[ligne])):
             lconfig_Random[ligne][element] = random.randint(0, 3)
@@ -264,29 +345,41 @@ def config_Random():
         liste_configs_fin(lconfig_Random)
     elif b == 1:
         additionner_configs_fin(lconfig_Random)
+    elif c == 1:
+        soustraire_configs_fin(lconfig_Random)
 
 def config_Pile():
     global lconfig_Pile
     global a
+    global b
+    global c
     N = int(input("Choisir le nombre de grains qui seront dans la case du milieu (max: 3) : "))
     lconfig_Pile[50][50] = N
     if a == 1:
         liste_configs_fin(lconfig_Pile)
     elif b == 1:
         additionner_configs_fin(lconfig_Pile)
+    elif c == 1:
+        soustraire_configs_fin(lconfig_Pile)
 
 def config_Max_stable():
     global lconfig_Max_stable
     global a
+    global b
+    global c
     lconfig_Max_stable = [[3]*100 for i in range(100)]
     if a == 1:
         liste_configs_fin(lconfig_Max_stable)
-    additionner_configs_fin(lconfig_Max_stable)
+    elif b == 1:
+        additionner_configs_fin(lconfig_Max_stable)
+    elif c == 1:
+        soustraire_configs_fin(lconfig_Max_stable)
 
 def config_Identity():
     global lconfig_identity
     global a
     global b
+    global c
 
     
 #Widgets
@@ -295,25 +388,28 @@ Bouton1 = tk.Button(racine, text="créer une configuration aléatoire", command=
 init_config_courante()
 Bouton2 = tk.Button(racine, text="charger une configuration dans la liste", command=liste_configs)
 Bouton3 = tk.Button(racine, text="construire une configuration", command=creer_config)
-Bouton_somme = tk.Button(racine, text="Additionner deux configurations", command=additionner_configs)
+Bouton_somme = tk.Button(racine, text="Additionner", command=additionner_configs)
+Bouton_soustraire = tk.Button(racine, text="Soustraire", command=soustraire_configs)
 
 #placement des widgets
-canvas.grid(row=0, column=1, rowspan=4, columnspan=2)
+canvas.grid(row=0, column=1, rowspan=5, columnspan=2)
 Bouton1.grid(row=0, column=0)
 Bouton2.grid(row=1, column=0)
 Bouton3.grid(row=2, column=0)
 Bouton_somme.grid(row=3, column=0)
+Bouton_soustraire.grid(row=4, column=0)
 
 #Fin
 canvas.mainloop()
 
 #Choses faites:
-#- écriture du début des fonctions liste_configs et additionner_config
-#- création des fonctions liées aux configurations
+#- création fonction config_Identity (mais pas encore écrite)
 #- correction de la fonction coordonnées (plusieurs clics sur la même case l.130), + fait qu'on pouvait continuer 
 #à modifier la configuration après avoir appuyé sur le bouton fin (création variable fin_creation_config)
-#- écriture fonction liste_config_fin
+#- écriture fonctions liste_config et liste_config_fin
 #- écriture fonctions config_Random, config_Max_stable et config_Pile
+#- écriture fonctions additionner_config et additionner_config_fin
+#- écriture fonctions soustraire_configs et soustraire_configs_fin
 
 #PROBLEMES:
 #- la fonction coordonnées prend en conpte les clic à gauche du canvas et sur le bouton fin
