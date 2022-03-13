@@ -22,15 +22,22 @@ bouton_fin = 0
 Text = 0
 #témoin de la création ou non de la grille
 grille_créée = False
-#Listes associées aux configurations à charger
+#Listes (avec leur bouton) associées aux configurations à charger
 lconfig_Random = [[0]*100 for i in range(100)]
-for ligne in range(len(lconfig_Random)):
-    for element in range(len(lconfig_Random[ligne])):
-        lconfig_Random[ligne][element] = random.randint(0, 3)
-lconfig_Pile = [[0]*100 for i in range(100)] #On la définira quand l'utilisateur voudra charger une configuration, pour lui demander 
-#le nombre central N
+bouton_Random = 0
+lconfig_Pile = [[0]*100 for i in range(100)] #On la définira quand l'utilisateur voudra charger une configuration, pour lui
+#demander le nombre central N
+bouton_Pile = 0
 lconfig_Max_stable = [[3]*100 for i in range(100)]
+bouton_Max_stable = 0
 lconfig_identity = [[0]*100 for i in range(100)] #On la définira quand on pourra stailiser une configuration
+bouton_Identity = 0
+#témoin de la fin ou non de la création d'une configuration:
+fin_creation_config = True
+#témoin d'utilisation ou non de liste_config
+a = 0
+#témoin d'utilisation ou non de additionner_configs
+b = 0
 
 
 #fenêtre 
@@ -96,6 +103,9 @@ def creer_config():
     global L
     global bouton_fin
     global Text
+    global fin_creation_config
+    #On désactive le témoin de fin de la création de la configuration s'il est activé
+    fin_creation_config = False
     #On vérifie d'abord s'il y a des rectangles pour les supprimer et éviter les bugs.
     #On parcours tous le canevas avec les deux "for":
     for ligne in range(len(L)):
@@ -120,44 +130,62 @@ def creer_config():
 
 def coordonnees(event):
     global L
-    #On récupère les coordonnées du clic:
-    x = event.x
-    y = event.y
-    #On transforme les coordonnées en valeurs qui seront adaptées à la liste:
-    x1 = x//5
-    y1 = y//5
-    #On ajoute un grain de sable aux coordonnées:
-    L[y1][x1] += 1
-    #Enfin, on l'affiche avec des rectangles:
-    if L[y1][x1] == 1:
-        canvas.create_rectangle((5*x1, 5*y1),(5*(x1 + 1),5*(y1 + 1)), fill="grey70")
-    elif L[y1][x1] == 2:
-        canvas.create_rectangle((5*x1, 5*y1),(5*(x1 + 1),5*(y1 + 1)), fill="yellow")
-    elif L[y1][x1] >= 3:
-        canvas.create_rectangle((5*x1, 5*y1),(5*(x1 + 1),5*(y1 + 1)), fill="orange")
-    #Et on recommence pour chaque clics tant que le bouton fin n'est pas utilisé.
-    racine.bind("<Button-1>", coordonnees)
+    global fin_creation_config
+    #On vérifie d'abord que le témoin est désactivé pour continuer
+    if fin_creation_config == False:
+        #On récupère les coordonnées du clic:
+        x = event.x
+        y = event.y
+        #On transforme les coordonnées en valeurs qui seront adaptées à la liste:
+        x1 = x//5
+        y1 = y//5
+        #Si on clic plus d'une fois sur la même case, il faut supprimer les anciens rectangles:
+        if L[y1][x1] >= 1:
+            objet = canvas.find_closest(x, y)
+            if len(objet) != 0:
+                canvas.delete(objet[0])
+        if (0 <= x and x <= 500) and (0 <= y and y <= 500):
+            #On ajoute un grain de sable aux coordonnées:
+            L[y1][x1] += 1
+            #Enfin, on l'affiche avec des rectangles:
+            if L[y1][x1] == 1:
+                canvas.create_rectangle((5*x1, 5*y1),(5*(x1 + 1),5*(y1 + 1)), fill="grey70")
+            elif L[y1][x1] == 2:
+                canvas.create_rectangle((5*x1, 5*y1),(5*(x1 + 1),5*(y1 + 1)), fill="yellow")
+            elif L[y1][x1] >= 3:
+                canvas.create_rectangle((5*x1, 5*y1),(5*(x1 + 1),5*(y1 + 1)), fill="orange")
+        #Et on recommence pour chaque clics tant que le bouton fin n'est pas utilisé.
+        racine.bind("<Button-1>", coordonnees)
 
 def creation_config_finie():
     """Arrête la création d'une configuration"""
     global bouton_fin
     global Text
+    global fin_creation_config
     #On supprime le text et le bouton:
     bouton_fin.destroy()
     Text.destroy()
+    #On actionne le témoin de fin de la création de la configuration
+    fin_creation_config = True
 
 def liste_configs():
     """Permet de charger une configuration dans une liste des configurations"""
+    global bouton_Random
+    global bouton_Pile
+    global bouton_Max_stable
+    global bouton_Identity
+    global a
+    a = 1
     #On créee les boutons (on verra plus tard pour la sauvegarde)
     bouton_Random = tk.Button(racine, text="config Random", command=config_Random)
     bouton_Pile = tk.Button(racine, text="config Pile", command=config_Pile)
     bouton_Max_stable = tk.Button(racine, text="config Max stable", command=config_Max_stable)
-    bouton_identity = tk.Button(racine, text="config Identity", command=config_Identity)
+    bouton_Identity = tk.Button(racine, text="config Identity", command=config_Identity)
     #On les positionne
     bouton_Random.grid(row=0, column=3)
     bouton_Pile.grid(row=1, column=3)
     bouton_Max_stable.grid(row=2, column=3)
-    bouton_identity.grid(row=3, column=3)
+    bouton_Identity.grid(row=3, column=3)
     #On vérifie ensuite s'il y a des rectangles pour les supprimer et éviter les bugs.
     #On parcours tous le canevas avec les deux "for":
     for ligne in range(len(L)):
@@ -172,32 +200,93 @@ def liste_configs():
                 #...et on initialise L aux coordonnées:
                 L[ligne][colonne] = 0
 
+def liste_configs_fin(liste):
+    global L
+    global bouton_Random
+    global bouton_Pile
+    global bouton_Max_stable
+    global bouton_Identity
+    global a
+    L = liste
+    bouton_Random.destroy()
+    bouton_Pile.destroy()
+    bouton_Max_stable.destroy()
+    bouton_Identity.destroy()
+    a = 0
+    #On appelle la fonction "couleurs" pour afficher les changements dans le canevas.
+    couleurs()
+
 def additionner_configs():
     """Permet d'additionner la configuration courante avec une configuration choisie dans la liste des configuration"""
+    global b
+    b = 1
     #On créee les boutons (on verra plus tard pour la sauvegarde)
-    bouton_Random = tk.Button(racine, text="config Random")
-    bouton_Pile = tk.Button(racine, text="config Pile")
-    bouton_Max_stable = tk.Button(racine, text="config Max stable")
-    bouton_identity = tk.Button(racine, text="config Identity")
+    bouton_Random = tk.Button(racine, text="config Random", command=config_Random)
+    bouton_Pile = tk.Button(racine, text="config Pile", command=config_Pile)
+    bouton_Max_stable = tk.Button(racine, text="config Max stable", command=config_Max_stable)
+    bouton_identity = tk.Button(racine, text="config Identity", command=config_Identity)
     #On les positionne
     bouton_Random.grid(row=0, column=3)
     bouton_Pile.grid(row=1, column=3)
     bouton_Max_stable.grid(row=2, column=3)
     bouton_identity.grid(row=3, column=3)
+    #text d'explication:
+    Text2 = tk.Label(racine, text="Cliquez sur la configuration avec laquelle vous voulez additionner la configuration courante")
+    Text2.grid(row=4, column=1)
 
-#fonctions des configurations de la liste des configurations
+def additionner_configs_fin(liste):
+    global L
+    global bouton_Random
+    global bouton_Pile
+    global bouton_Max_stable
+    global bouton_Identity
+    global b
+    bouton_Random.destroy()
+    bouton_Pile.destroy()
+    bouton_Max_stable.destroy()
+    bouton_Identity.destroy()
+    b = 0
+    for ligne in range(len(L)):
+        for element in range(len(L[ligne])):
+            L[ligne][element] = L[ligne][element] + liste[ligne][element]
+    #On appelle la fonction "couleurs" pour afficher les changements dans le canevas.
+    couleurs()
+
+#fonctions liées aux configurations de la liste des configurations
 
 def config_Random():
-    pass
+    global lconfig_Random
+    global a
+    for ligne in range(len(lconfig_Random)):
+        for element in range(len(lconfig_Random[ligne])):
+            lconfig_Random[ligne][element] = random.randint(0, 3)
+    if a == 1:
+        liste_configs_fin(lconfig_Random)
+    elif b == 1:
+        additionner_configs_fin(lconfig_Random)
 
 def config_Pile():
-    pass
+    global lconfig_Pile
+    global a
+    N = int(input("Choisir le nombre de grains qui seront dans la case du milieu (max: 3) : "))
+    lconfig_Pile[50][50] = N
+    if a == 1:
+        liste_configs_fin(lconfig_Pile)
+    elif b == 1:
+        additionner_configs_fin(lconfig_Pile)
 
 def config_Max_stable():
-    pass
+    global lconfig_Max_stable
+    global a
+    lconfig_Max_stable = [[3]*100 for i in range(100)]
+    if a == 1:
+        liste_configs_fin(lconfig_Max_stable)
+    additionner_configs_fin(lconfig_Max_stable)
 
 def config_Identity():
-    pass
+    global lconfig_identity
+    global a
+    global b
 
     
 #Widgets
@@ -217,3 +306,14 @@ Bouton_somme.grid(row=3, column=0)
 
 #Fin
 canvas.mainloop()
+
+#Choses faites:
+#- écriture du début des fonctions liste_configs et additionner_config
+#- création des fonctions liées aux configurations
+#- correction de la fonction coordonnées (plusieurs clics sur la même case l.130), + fait qu'on pouvait continuer 
+#à modifier la configuration après avoir appuyé sur le bouton fin (création variable fin_creation_config)
+#- écriture fonction liste_config_fin
+#- écriture fonctions config_Random, config_Max_stable et config_Pile
+
+#PROBLEMES:
+#- la fonction coordonnées prend en conpte les clic à gauche du canvas et sur le bouton fin
