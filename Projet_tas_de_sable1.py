@@ -132,7 +132,7 @@ def creer_config():
     bouton_fin = tk.Button(racine, text="J'ai fini", command=creation_config_finie)
     bouton_fin.grid(row=6, column=3)
     #Enfin, on lie le clic gauche de la souris avec une fonction:
-    racine.bind("<Button-1>", coordonnees)
+    canvas.bind("<Button-1>", coordonnees)
 
 def coordonnees(event):
     global L
@@ -161,7 +161,7 @@ def coordonnees(event):
             elif L[y1][x1] >= 3:
                 canvas.create_rectangle((5*x1, 5*y1),(5*(x1 + 1),5*(y1 + 1)), fill="orange")
         #Et on recommence pour chaque clics tant que le bouton fin n'est pas utilisé.
-        racine.bind("<Button-1>", coordonnees)
+        canvas.bind("<Button-1>", coordonnees)
 
 def creation_config_finie():
     """Arrête la création d'une configuration"""
@@ -479,3 +479,4 @@ canvas.mainloop()
 
 #PROBLEMES:
 #- la fonction coordonnées prend en conpte les clic à gauche du canvas et sur le bouton fin
+# ---> resolu
