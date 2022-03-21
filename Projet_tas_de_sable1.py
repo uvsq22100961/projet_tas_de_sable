@@ -127,10 +127,10 @@ def creer_config():
                 L[ligne][colonne] = 0
     #text d'explications:
     Text = tk.Label(racine, text="Cliquer sur une case pour augmenter le nombre de grains")
-    Text.grid(row=4, column=2)
+    Text.grid(row=6, column=2)
     #bouton pour arrêter la création de la configuration
     bouton_fin = tk.Button(racine, text="J'ai fini", command=creation_config_finie)
-    bouton_fin.grid(row=4, column=3)
+    bouton_fin.grid(row=6, column=3)
     #Enfin, on lie le clic gauche de la souris avec une fonction:
     racine.bind("<Button-1>", coordonnees)
 
@@ -245,7 +245,7 @@ def additionner_configs():
     bouton_Identity.grid(row=3, column=3)
     #text d'explication:
     Text2 = tk.Label(racine, text="Cliquez sur la configuration avec laquelle vous voulez additionner la configuration courante")
-    Text2.grid(row=5, column=1)
+    Text2.grid(row=6, column=1)
 
 def additionner_configs_fin(liste):
     global L
@@ -298,7 +298,7 @@ def soustraire_configs():
     bouton_Identity.grid(row=3, column=3)
     #text d'explication:
     Text3 = tk.Label(racine, text="Cliquez sur la configuration qui soustraira la configuration courante")
-    Text3.grid(row=5, column=1)
+    Text3.grid(row=6, column=1)
 
 def soustraire_configs_fin(liste):
     global L
@@ -312,6 +312,7 @@ def soustraire_configs_fin(liste):
     bouton_Pile.destroy()
     bouton_Max_stable.destroy()
     bouton_Identity.destroy()
+    Text3.destroy
     c = 0
     #On vérifie ensuite s'il y a des rectangles pour les supprimer et éviter les bugs.
     #On parcours tous le canevas avec les deux "for":
@@ -381,6 +382,65 @@ def config_Identity():
     global b
     global c
 
+def automate1():
+    """effectue une étape de l'automate"""
+    #On créé une liste égale à L pour pouvoir modifier L en fonction de ce que L est à l'instant t où on appui sur le bouton.
+    L2 = []
+    for lignes in L:
+        L2.append(list(lignes))
+    #On vérifie s'il y a des rectangles pour les supprimer et éviter les bugs.
+    #On parcours tous le canevas avec les deux "for":
+    for ligne in range(len(L)):
+        for colonne in range(len(L[ligne])):
+            #S'il y a au moins un grain de sable dans la case...
+            if L[ligne][colonne] != 0:
+                objet = canvas.find_closest(1 + 5*colonne, 1 + 5*ligne)
+                #...on supprime le rectangle de la case...
+                if len(objet) != 0:
+                    canvas.delete(objet[0])
+                #...et on initialise L aux coordonnées:
+    for lignes in range(len(L2)):
+        for element in range(len(L2[lignes])):
+            if L2[lignes][element] >= 4:
+                L[lignes][element] -= 4
+                if element != 0:
+                    L[lignes][element - 1] += 1
+                if lignes != 0:
+                    L[lignes - 1][element] += 1
+                if element != 99:
+                    L[lignes][element + 1] += 1
+                if lignes != 99:
+                    L[lignes + 1][element] += 1
+    #On appelle la fonction "couleurs" pour afficher les changements dans le canevas.
+    couleurs()
+
+def calcul_stabilisation():
+    """Calcul la stabilisation de la configuration courante"""
+    L2 = []
+    for lignes0 in L:
+             L2.append(list(lignes0))
+    for lignes in range(len(L)):
+        for element in range(len(L[lignes])):
+            while L[lignes][element] >= 4:
+                for lignes1 in range(len(L2)):
+                    for element1 in range(len(L2[lignes])):
+                        if L2[lignes1][element1] >= 4:
+                            L[lignes1][element1] -= 4
+                        if element1 != 0:
+                            L[lignes1][element1 - 1] += 1
+                        if lignes1 != 0:
+                            L[lignes1 - 1][element1] += 1
+                        if element1 != 99:
+                            L[lignes1][element1 + 1] += 1
+                        if lignes1 != 99:
+                            L[lignes1 + 1][element1] += 1
+        for lignes2 in range(len(L)):
+                    for element2 in range(len(L[lignes2])):
+                        if L[lignes2][element2] >= 4:
+                            #calcul_stabilisation()
+                            0
+
+
     
 #Widgets
 racine.title("Projet tas de sable")
@@ -390,19 +450,23 @@ Bouton2 = tk.Button(racine, text="charger une configuration dans la liste", comm
 Bouton3 = tk.Button(racine, text="construire une configuration", command=creer_config)
 Bouton_somme = tk.Button(racine, text="Additionner", command=additionner_configs)
 Bouton_soustraire = tk.Button(racine, text="Soustraire", command=soustraire_configs)
+Bouton_automate1 = tk.Button(racine, text="Effectuer une étape de l'automate", command=automate1)
 
 #placement des widgets
-canvas.grid(row=0, column=1, rowspan=5, columnspan=2)
+canvas.grid(row=0, column=1, rowspan=6, columnspan=2)
 Bouton1.grid(row=0, column=0)
 Bouton2.grid(row=1, column=0)
 Bouton3.grid(row=2, column=0)
 Bouton_somme.grid(row=3, column=0)
 Bouton_soustraire.grid(row=4, column=0)
+Bouton_automate1.grid(row=5, column=0)
 
 #Fin
 canvas.mainloop()
+#calcul_stabilisation()
 
 #Choses faites:
+#13/03
 #- création fonction config_Identity (mais pas encore écrite)
 #- correction de la fonction coordonnées (plusieurs clics sur la même case l.130), + fait qu'on pouvait continuer 
 #à modifier la configuration après avoir appuyé sur le bouton fin (création variable fin_creation_config)
@@ -410,6 +474,8 @@ canvas.mainloop()
 #- écriture fonctions config_Random, config_Max_stable et config_Pile
 #- écriture fonctions additionner_config et additionner_config_fin
 #- écriture fonctions soustraire_configs et soustraire_configs_fin
+# 21/03
+#- écriture fonction automate1
 
 #PROBLEMES:
 #- la fonction coordonnées prend en conpte les clic à gauche du canvas et sur le bouton fin
